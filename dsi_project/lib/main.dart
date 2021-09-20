@@ -26,7 +26,7 @@ class RandomWords extends StatefulWidget {
 class _RandomWordsState extends State<RandomWords> {
   @override
   final _suggestions = <WordPair>[];
-  final _saved = <WordPair>{};
+  final _saved = <WordPair>[];
   final _biggerFont = const TextStyle(fontSize: 18);
   void _pushSaved() {
     Navigator.of(context)
@@ -70,6 +70,9 @@ class _RandomWordsState extends State<RandomWords> {
 
   Widget _buildRow(WordPair pair) {
     final alreadySaved = _saved.contains(pair);
+    String texto1 = "";
+    String texto2 = "";
+
     return Dismissible(
       key: Key(pair.toString()),
       onDismissed: (direction) {
@@ -88,18 +91,86 @@ class _RandomWordsState extends State<RandomWords> {
           pair.asPascalCase,
           style: _biggerFont,
         ),
-        trailing: Icon(
-          alreadySaved ? Icons.favorite : Icons.favorite_border,
-          color: alreadySaved ? Colors.blue : null,
+        trailing: new IconButton(
+          onPressed: () {
+            setState(() {
+              if (alreadySaved) {
+                _saved.remove(pair);
+              } else {
+                _saved.add(pair);
+              }
+            });
+          },
+          icon: Icon(
+            alreadySaved ? Icons.favorite : Icons.favorite_border,
+            color: alreadySaved ? Colors.blue : null,
+          ),
         ),
         onTap: () {
-          setState(() {
-            if (alreadySaved) {
-              _saved.remove(pair);
-            } else {
-              _saved.add(pair);
-            }
-          });
+          Navigator.of(context).push(
+            MaterialPageRoute(builder: (BuildContext context) {
+              return Scaffold(
+                appBar: AppBar(
+                  title: Text(pair.toString()),
+                ),
+                body: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text(
+                          "Editar",
+                          style: _biggerFont,
+                        ),
+                        SizedBox(
+                          height: 20.0,
+                        ),
+                        Padding(
+                          padding: EdgeInsets.all(10.0),
+                          child: Container(
+                            height: 40,
+                            width: 200,
+                            child: TextField(
+                              onChanged: (text1) {
+                                texto1 = text1;
+                              },
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.all(100.0),
+                          child: Container(
+                            height: 40,
+                            width: 200,
+                            child: TextField(
+                              onChanged: (text2) {
+                                texto2 = text2;
+                              },
+                            ),
+                          ),
+                        ),
+                        ElevatedButton(
+                            onPressed: () {
+                              setState(() {
+                                _suggestions[_suggestions.indexOf(pair)] =
+                                    WordPair(texto1, texto2);
+                                if (alreadySaved) {
+                                  _saved[_saved.indexOf(pair)] =
+                                      WordPair(texto1, texto2);
+                                }
+                              });
+                            },
+                            child: Text("Editar"))
+                      ],
+                    ),
+                  ],
+                ),
+              );
+            }),
+          );
         },
       ),
     );
